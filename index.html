@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Wrestling Superfan Quiz</title>
+    <link rel="stylesheet" href="/src/index.css">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div id="app-container">
+        <!-- Start Screen -->
+        <section id="start-screen" class="screen active">
+            <div class="logo-container">
+                <h1 class="title">Pro Wrestling<br><span class="highlight">Superfan Quiz</span></h1>
+                <div class="attribution-main">
+                    <div class="divider"></div>
+                    <p>Erstellt von Hendrik Streich für die Facebook-Gruppe:<br>
+                    <strong>Wrestling / WWE / AEW / NXT / TNA / RoH / NJPW / WWF / WCW / ECW / NWA</strong></p>
+                </div>
+            </div>
+            <div class="menu-buttons">
+                <button id="btn-start-game" class="btn-primary">Spiel Starten</button>
+                <button id="btn-show-leaderboard" class="btn-secondary">Bestenliste</button>
+            </div>
+        </section>
+
+        <!-- Difficulty Selection -->
+        <section id="difficulty-screen" class="screen">
+            <h2 class="screen-title">Schwierigkeitsgrad wählen</h2>
+            <div class="difficulty-options">
+                <button class="btn-diff" data-diff="easy">
+                    <span class="diff-name">Leicht</span>
+                    <span class="diff-desc">15 Fragen • Bekannte Fakten</span>
+                </button>
+                <button class="btn-diff" data-diff="medium">
+                    <span class="diff-name">Mittel</span>
+                    <span class="diff-desc">25 Fragen • Fortgeschrittenes Wissen</span>
+                </button>
+                <button class="btn-diff" data-diff="hard">
+                    <span class="diff-name">Schwer</span>
+                    <span class="diff-desc">40 Fragen • Hardcore Fan Wissen</span>
+                </button>
+            </div>
+            <button class="btn-back">Zurück</button>
+        </section>
+
+        <!-- Instructions Screen -->
+        <section id="instructions-screen" class="screen">
+            <h2 class="screen-title">Anleitung</h2>
+            <div class="content-box">
+                <p class="intro-text">Dieses Wrestling Quiz wurde von Hendrik Streich für die Facebook-Gruppe 
+                <strong>'Wrestling / WWE / AEW / NXT / TNA / RoH / NJPW / WWF / WCW / ECW / NWA'</strong> 
+                erstellt. Teste dein Wissen über die Geschichte des Professional Wrestling!</p>
+                
+                <div class="divider"></div>
+
+                <ul>
+                    <li>Wähle eine Antwort aus vier Möglichkeiten.</li>
+                    <li>Je schneller du antwortest, desto mehr Punkte kannst du (theoretisch) sammeln.</li>
+                    <li>Punkte basieren auf korrekten Antworten und Schwierigkeit.</li>
+                    <li>Am Ende kannst du deinen Namen in die globale Bestenliste eintragen.</li>
+                </ul>
+                <p><strong>Runden-Längen:</strong></p>
+                <ul>
+                    <li>Leicht: 15 Fragen</li>
+                    <li>Mittel: 25 Fragen</li>
+                    <li>Schwer: 40 Fragen</li>
+                </ul>
+            </div>
+            <button id="btn-begin-quiz" class="btn-primary">Verstanden, Los!</button>
+        </section>
+
+        <!-- Quiz Gameplay -->
+        <section id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <div class="progress-info">
+                    Frage <span id="current-question-num">1</span> / <span id="total-questions-num">15</span>
+                </div>
+                <div class="score-info">
+                    Punkte: <span id="current-score">0</span>
+                </div>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progress-bar-fill"></div>
+            </div>
+            <div id="question-container">
+                <div id="question-image-container" class="hidden">
+                    <img id="question-image" src="" alt="Wrestling Bild" referrerPolicy="no-referrer">
+                </div>
+                <h3 id="question-text">Lädt Frage...</h3>
+                <div id="answer-options" class="answer-grid">
+                    <!-- Buttons will be injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Screen -->
+        <section id="result-screen" class="screen">
+            <h2 class="screen-title">Ergebnis</h2>
+            <div class="result-box">
+                <div class="result-stat">
+                    <span class="label">Korrekte Antworten:</span>
+                    <span id="res-correct" class="value">0</span>
+                </div>
+                <div class="result-stat">
+                    <span class="label">Gesamtfragen:</span>
+                    <span id="res-total" class="value">0</span>
+                </div>
+                <div class="result-stat">
+                    <span class="label">Prozent:</span>
+                    <span id="res-percent" class="value">0%</span>
+                </div>
+                <div class="result-stat highlight-stat">
+                    <span class="label">Gesamtpunktzahl:</span>
+                    <span id="res-score" class="value">0</span>
+                </div>
+            </div>
+
+            <div id="highscore-form" class="highscore-entry">
+                <h3>In Bestenliste eintragen?</h3>
+                <input type="text" id="player-name" placeholder="Dein Name" maxlength="20">
+                <button id="btn-submit-score" class="btn-primary">Score Absenden</button>
+            </div>
+
+            <div class="result-actions">
+                <button id="btn-restart" class="btn-secondary">Nochmal spielen</button>
+                <button id="btn-go-home" class="btn-back">Hauptmenü</button>
+            </div>
+        </section>
+
+        <!-- Leaderboard Screen -->
+        <section id="leaderboard-screen" class="screen">
+            <h2 class="screen-title">Bestenliste</h2>
+            <div class="leaderboard-filters">
+                <button class="filter-btn active" data-filter="all">Alle</button>
+                <button class="filter-btn" data-filter="easy">Leicht</button>
+                <button class="filter-btn" data-filter="medium">Mittel</button>
+                <button class="filter-btn" data-filter="hard">Schwer</button>
+            </div>
+            <div class="leaderboard-container">
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Punkte</th>
+                            <th>Level</th>
+                            <th>Datum</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Rows will be injected here -->
+                    </tbody>
+                </table>
+                <div id="leaderboard-loading" class="loading-spinner hidden">Lädt...</div>
+            </div>
+            <button class="btn-back">Zurück</button>
+        </section>
+    </div>
+
+    <footer class="app-footer">
+        <p>Erstellt von Hendrik Streich für die Facebook-Gruppe:<br>
+        Wrestling / WWE / AEW / NXT / TNA / RoH / NJPW / WWF / WCW / ECW / NWA</p>
+    </footer>
+
+    <script type="module" src="/src/script.js"></script>
+</body>
+</html>
